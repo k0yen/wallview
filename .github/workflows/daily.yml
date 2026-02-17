@@ -1,0 +1,32 @@
+name: Daily Wallpaper Fetch
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Runs every day at midnight
+  workflow_dispatch: # Allows manual trigger
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run Fetcher
+        run: python scripts/fetch_daily.py
+
+      - name: Commit and Push
+        run: |
+          git config --global user.name 'Wallpaper Bot'
+          git config --global user.email 'bot@github.com'
+          git add wallpapers/ wallpapers.json
+          git commit -m "Auto-fetch: New wallpaper for $(date +'%Y-%m-%d')" || echo "No changes"
+          git push
+
